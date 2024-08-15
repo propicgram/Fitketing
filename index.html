@@ -10,7 +10,7 @@
     <title>핏케팅</title>
     <style>
 
-        button:focus{
+button:focus{
             outline: none;
         }
 
@@ -23,6 +23,10 @@
 
         *{
             font-family: 'LINESeedKR-Bd', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html{
+            -webkit-touch-callout:none;
         }
 
         body {
@@ -74,6 +78,15 @@
             text-align: left;
             background-color: #f9f9f9;
             border-radius: 8px;
+        }
+
+        .no-drag {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         #timeDisplay {
@@ -268,7 +281,7 @@
         }
     </style>
 </head>
-<body>
+<body class="no-drag">
     <div class="container" id="initialContainer">
         <div class="header">
             <h3>Fitketing 핏케팅</h3>
@@ -288,6 +301,7 @@
         <h2>좌석 선택</h2>
         <div id="seatingContainer">
             <div id="seating">
+                <!-- 좌석이 JavaScript로 동적으로 생성됩니다 -->
             </div>
         </div>
         <button id="submitSeatsButton" type="button">예매하기</button>
@@ -302,6 +316,7 @@
         <button id="retryButton" onclick="retryBooking()">다시하기</button>
     </div>
 
+    <!-- CAPTCHA 모달 -->
     <div id="captchaModal" style="display:none;">
         <div class="captcha-container">
             <div id="captcha" class="captcha-text"></div>
@@ -312,6 +327,7 @@
         </div>
     </div>
 
+    <!-- 대기열 모달 -->
     <div id="modal" style="display:none;">
         <div id="modalContent">
             <p id="queueNumber">대기순번 123번</p>
