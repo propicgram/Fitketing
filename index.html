@@ -15,6 +15,8 @@
     <meta property="og:description" content="티케팅연습은 핏케팅">
 
     <title>티케팅 연습은 핏케팅</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
 
 button:focus{
@@ -262,25 +264,66 @@ button:focus{
         }
 
         #resultContainer {
-            display: none;
-        }
+    display: none;
+    background-color: #f7f7f7; 
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    color: #333; 
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+}
 
-        #retryButton {
-            margin-top: 20px;
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: #4caf50;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            outline: none;
-        }
+#resultHeader {
+    text-align: center;
+    margin-bottom: 30px;
+}
 
-        #retryButton:hover {
-            background-color: #45a049;
-        }
+#resultHeader h2 {
+    font-size: 36px; 
+    font-weight: bold;
+    color: #333; 
+    margin-bottom: 0px;
+}
+
+#resultContent {
+    text-align: center; 
+}
+
+#resultDetails {
+    margin-bottom: 20px;
+}
+
+#resultDetails p {
+    font-size: 18px;
+    margin: 10px 0;
+    color: #555;
+}
+
+#resultDetails p strong {
+    color: #333; 
+}
+
+
+
+#retryButton {
+    display: block;
+    background-color: #333; 
+    color: #fff;
+    font-size: 20px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    outline: none;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#retryButton:hover {
+    background-color: #555; 
+}
 
         #retryButton:disabled {
             background-color: #ccc;
@@ -303,7 +346,7 @@ button:focus{
             position: absolute;
             top: 0;
             left: 0;
-            transition: width 0.1s linear;
+            transition: width 0.1s linear; 
         }
 
 
@@ -318,14 +361,13 @@ button:focus{
 
 .footer {
     text-align: center;
-    padding: 10px 0;
+    padding: 3px 0;
     background-color: #f0f2f5;
-    font-size: 14px;
+    font-size: 10px;
     color: #555;
     position: fixed;
     bottom: 0;
     width: 100%;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -333,24 +375,25 @@ button:focus{
     display: none;
     text-align: center;
     padding: 30px;
-    background-color: #4caf50;
+    background-color: #ffffff; 
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #resultContainer p {
-    color: #fff;
+    color: #000000; 
     font-size: 18px;
     margin-bottom: 15px;
 }
 
 #resultMessage {
-    font-size: 24px;
+    font-size: 26px; 
     font-weight: bold;
+    margin-bottom: 20px; 
 }
 
 #retryButton {
-    background-color: #fff; 
+    background-color: #dfdfdf; 
     color: #000000; 
     font-size: 18px;
     padding: 12px 24px;
@@ -365,6 +408,31 @@ button:focus{
     background-color: #ccc;
     color: #242424;
 }
+
+
+@keyframes scoreBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+}
+
+#scoreNumber {
+    display: inline-block;
+    transition: transform 0.5s ease;
+}
+
+#resultChart {
+    max-width: 100%;
+    height: 400px;
+    margin-bottom: 30px;
+}
+
+#reactionTimeChart, #accuracyChart {
+    max-width: 100%;
+    height: 300px;
+    margin-bottom: 20px;
+}
+
     </style>
 </head>
 <body class="no-drag">
@@ -384,12 +452,16 @@ button:focus{
         <button id="bookingButton" onclick="startGame()">예매하기</button>
     </div>
 
-    <div class="container" id="gameContainer" style="display:none;">
+    <div id="gameContainer" style="display:none;">
         <div id="hpBar">
             <div id="hpBarFill"></div>
         </div>
         <div id="timer">10</div>
-        <h2>좌석 선택</h2>
+        <div style="display: flex; justify-content: space-between;">
+            <div id="scoreDisplay" style="flex: 1; text-align: left;">점수  <span id="scoreNumber">0</span></div>
+            <div id="accuracyDisplay" style="flex: 1; text-align: right;">정확도 100%</div>
+        </div>
+        
         <div id="seatingContainer">
             <div id="seating">
 
@@ -397,6 +469,7 @@ button:focus{
         </div>
         <button id="submitSeatsButton" type="button">예매하기</button>
     </div>
+    
 
 
     <div id="captchaModal" style="display:none;">
@@ -411,6 +484,7 @@ button:focus{
         </div>
     </div>
 
+
     <div id="modal" style="display:none;">
         <div id="modalContent">
             <p id="queueNumber">대기순번 123번</p>
@@ -418,13 +492,29 @@ button:focus{
         </div>
     </div>
 
-    <div id="resultContainer" style="display:none;">
-        <p id="resultMessage"></p>
-        <p id="timeTaken"></p>
-        <p id="seatSelectionTimeTaken"></p>
-        <p id="captchaTimeTaken"></p>
-        <button id="retryButton" onclick="retryBooking()">재시도</button>
+    <div id="resultContainer">
+        <div class="header">
+            <img src="./img/logo.png">
+            <h1>Fitketing 핏케팅</h1>
+        </div>
+        <div id="resultHeader">
+            <h2 id="finalScore">최종 점수 0점</h2>
+            <span id="bestScore" style="font-size: 18px; color: #777;">최고 점수 0점</span>
+        </div>
+        
+        <div id="resultContent">
+            <div id="resultDetails">
+                <p><strong>평균 반응 속도 </strong> <span id="averageReactionTime"></span></p>
+                <canvas id="reactionTimeChart"></canvas> 
+                <p><strong>최종 정확도 </strong> <span id="finalAccuracy"></span></p>
+                <canvas id="accuracyChart"></canvas> 
+            </div>
+            <button id="retryButton" onclick="retryBooking()">다시 도전하기</button>
+        </div>
     </div>
+    
+    
+    
 
     <footer class="footer">
         <p>&copy; 2024 Fitketing. All rights reserved.</p>
@@ -432,10 +522,8 @@ button:focus{
     
 
     <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-const _0x309b21=_0x4c9e;(function(_0x1eca3f,_0x342982){const _0x35c3c6=_0x4c9e,_0x3f8561=_0x1eca3f();while(!![]){try{const _0x5b3119=-parseInt(_0x35c3c6(0x1a9))/0x1*(parseInt(_0x35c3c6(0x1bb))/0x2)+-parseInt(_0x35c3c6(0x194))/0x3*(parseInt(_0x35c3c6(0x19f))/0x4)+-parseInt(_0x35c3c6(0x192))/0x5+parseInt(_0x35c3c6(0x1cd))/0x6*(parseInt(_0x35c3c6(0x1c3))/0x7)+-parseInt(_0x35c3c6(0x1b8))/0x8+-parseInt(_0x35c3c6(0x1c7))/0x9+parseInt(_0x35c3c6(0x1be))/0xa*(parseInt(_0x35c3c6(0x1af))/0xb);if(_0x5b3119===_0x342982)break;else _0x3f8561['push'](_0x3f8561['shift']());}catch(_0x23b6dc){_0x3f8561['push'](_0x3f8561['shift']());}}}(_0x1602,0x29720));const gameContainer=document[_0x309b21(0x1d3)](_0x309b21(0x1c1)),resultContainer=document[_0x309b21(0x1d3)](_0x309b21(0x1a8)),resultMessageElement=document[_0x309b21(0x1d3)]('resultMessage'),timeTakenElement=document[_0x309b21(0x1d3)](_0x309b21(0x1c2)),captchaTimeTakenElement=document[_0x309b21(0x1d3)]('captchaTimeTaken'),seatSelectionTimeTakenElement=document[_0x309b21(0x1d3)]('seatSelectionTimeTaken'),retryButton=document[_0x309b21(0x1d3)](_0x309b21(0x1cb)),submitSeatsButton=document[_0x309b21(0x1d3)]('submitSeatsButton'),modal=document[_0x309b21(0x1d3)](_0x309b21(0x1cc)),queueNumberElement=document[_0x309b21(0x1d3)](_0x309b21(0x1d9)),captchaModal=document[_0x309b21(0x1d3)]('captchaModal'),captchaText=document[_0x309b21(0x1d3)](_0x309b21(0x1d8)),captchaInput=document[_0x309b21(0x1d3)](_0x309b21(0x1a0)),captchaMessage=document[_0x309b21(0x1d3)](_0x309b21(0x1a6)),refreshCaptchaButton=document[_0x309b21(0x1d3)](_0x309b21(0x1b7)),submitCaptchaButton=document[_0x309b21(0x1d3)]('submit-captcha');let seconds=0x38,minutes=0x3b,hours=0xb,queueStartTime,selectionStartTime,selectionEndTime,captchaValue,captchaStartTime,captchaEndTime;const totalSeats=0xc8,seatingContainer=document['getElementById'](_0x309b21(0x1c8)),availableSeats=new Set(),selectedSeats=new Set(),fakeSeats=new Set(),hpBarFill=document[_0x309b21(0x1d3)](_0x309b21(0x1a5)),timerElement=document[_0x309b21(0x1d3)]('timer'),bookingButton=document['getElementById']('bookingButton');let timerInterval,gameTime=0xa,hp=0x64,lastTime,initialGameTime=0xa;const timeDecrease=0.5,minGameTime=1.5;let set=0x0;function startGame(){const _0x17acff=_0x309b21;if(!bookingButton[_0x17acff(0x1d1)][_0x17acff(0x1b2)](_0x17acff(0x1ce)))return;set==0x0&&startQueue(),createSeating(),queueStartTime=new Date(),gameTime=Math[_0x17acff(0x1ab)](initialGameTime,minGameTime),hp=0x64,startTimer(),!document[_0x17acff(0x1d3)]('skipCaptcha')[_0x17acff(0x1b3)]&&setTimeout(()=>{const _0x5cf741=_0x17acff;captchaModal[_0x5cf741(0x1b6)][_0x5cf741(0x1bc)]='flex',captchaStartTime=new Date(),setCaptcha();},0x64);}function startTimer(){lastTime=performance['now'](),requestAnimationFrame(updateHp);}function updateHp(_0x23ebcf){const _0x47242b=_0x309b21,_0x4d5363=(_0x23ebcf-lastTime)/0x3e8;lastTime=_0x23ebcf,hp=gameTime/ initialGameTime*0x64,hpBarFill[_0x47242b(0x1b6)]['width']=hp+'%',gameTime-=_0x4d5363;if(hp<=0x0||gameTime<=0x0){hpBarFill[_0x47242b(0x1b6)][_0x47242b(0x199)]='0%',timerElement['textContent']='시간\x20초과!',captchaModal[_0x47242b(0x1b6)]['display']=_0x47242b(0x1c4),endGame();return;}timerElement[_0x47242b(0x1b0)]=Math[_0x47242b(0x1da)](gameTime),requestAnimationFrame(updateHp);}function _0x4c9e(_0x1227ec,_0x2a6754){const _0x1602ed=_0x1602();return _0x4c9e=function(_0x4c9ed7,_0x129251){_0x4c9ed7=_0x4c9ed7-0x192;let _0x24511d=_0x1602ed[_0x4c9ed7];return _0x24511d;},_0x4c9e(_0x1227ec,_0x2a6754);}function endGame(){const _0x415a1b=_0x309b21;gameContainer[_0x415a1b(0x1b6)]['display']=_0x415a1b(0x1c4),resultContainer[_0x415a1b(0x1b6)][_0x415a1b(0x1bc)]=_0x415a1b(0x1bf),resultMessageElement[_0x415a1b(0x1d7)]='이미\x20선택된\x20좌석입니다.<br>선택\x20성공\x20좌석:\x20'+totalSeatsSelected+'석',retryButton['textContent']=_0x415a1b(0x1ad);}function updateFakeTime(){const _0x1a41e2=_0x309b21;seconds++;seconds===0x3c&&(seconds=0x0,minutes++);minutes===0x3c&&(minutes=0x0,hours++);hours===0xd&&(hours=0x1);const _0x39d6c1=String(hours)[_0x1a41e2(0x1a1)](0x2,'0'),_0x7ce640=String(minutes)[_0x1a41e2(0x1a1)](0x2,'0'),_0x1b54e3=String(seconds)[_0x1a41e2(0x1a1)](0x2,'0');timeDisplay['textContent']=_0x39d6c1+':'+_0x7ce640+':'+_0x1b54e3,hours===0xc&&minutes===0x0&&seconds===0x0&&activateButton();}function activateButton(){const _0x4db9f3=_0x309b21;bookingButton[_0x4db9f3(0x1d1)][_0x4db9f3(0x1ae)]('active'),bookingButton[_0x4db9f3(0x1d5)]=![],bookingButton[_0x4db9f3(0x1bd)](_0x4db9f3(0x19a),showAlert);}function _0x1602(){const _0x4b9619=['queueNumber','ceil','538135bjitOh','unavailable','405165VUPLil','대기순번\x20','size','flex','remove','width','click','CAPTCHA를\x20먼저\x20완료해주세요.','length','addEventListener','reload','4atAfVx','captcha-input','padStart','log','trim','floor','hpBarFill','captcha-message','createElement','resultContainer','519oBWwLz','has','max','fake','다시\x20도전하기','add','200453OMgVXP','textContent','clear','contains','checked','seat','value','style','refresh-captcha','1567888GludHk','includes','appendChild','646mhaMSm','display','removeEventListener','470fzQQjm','block','delete','gameContainer','timeTaken','42SshGfS','none','color','좌석을\x20선택해주세요.','789516ZygWmu','seating','보안문자가\x20틀렸습니다.','random','retryButton','modal','7308bQJuIM','active','dataset','index','classList','toggle','getElementById','push','disabled','red','innerHTML','captcha'];_0x1602=function(){return _0x4b9619;};return _0x1602();}function showAlert(){alert('예매는\x2012:00에\x20시작됩니다.');}bookingButton[_0x309b21(0x19d)](_0x309b21(0x19a),showAlert);function startQueue(){const _0x2d6202=_0x309b21;if(!bookingButton[_0x2d6202(0x1d1)][_0x2d6202(0x1b2)]('active'))return;set=0x1;const _0x6770f3=Math[_0x2d6202(0x1a4)](Math[_0x2d6202(0x1ca)]()*(0x159-0x40+0x1))+0x40;queueNumberElement&&(queueNumberElement[_0x2d6202(0x1b0)]=_0x2d6202(0x195)+_0x6770f3+'번'),modal[_0x2d6202(0x1b6)]['display']=_0x2d6202(0x197),console[_0x2d6202(0x1a2)]('1'),setTimeout(()=>{const _0x5b0988=_0x2d6202;console[_0x5b0988(0x1a2)]('2'),modal[_0x5b0988(0x1b6)]['display']=_0x5b0988(0x1c4),initialContainer[_0x5b0988(0x1b6)][_0x5b0988(0x1bc)]=_0x5b0988(0x1c4),gameContainer['style']['display']=_0x5b0988(0x1bf);},0x3e8);}function generateCaptcha(_0x2d0d39=0x6){const _0xfadcbe=_0x309b21,_0x30b95c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let _0xcc25c1='';for(let _0x1789ab=0x0;_0x1789ab<_0x2d0d39;_0x1789ab++){const _0x28ff2e=Math[_0xfadcbe(0x1a4)](Math['random']()*_0x30b95c['length']);_0xcc25c1+=_0x30b95c[_0x28ff2e];}return _0xcc25c1;}function setCaptcha(){const _0x4b8486=_0x309b21;captchaInput[_0x4b8486(0x1b5)]='',captchaValue=generateCaptcha(),captchaText[_0x4b8486(0x1b0)]=captchaValue;}function validateCaptcha(){const _0x8e83ab=_0x309b21,_0x320615=captchaInput['value'][_0x8e83ab(0x1a3)]();_0x320615===captchaValue?(captchaModal['style']['display']=_0x8e83ab(0x1c4),selectionStartTime=new Date()):(captchaMessage[_0x8e83ab(0x1b0)]=_0x8e83ab(0x1c9),captchaMessage[_0x8e83ab(0x1b6)]['color']=_0x8e83ab(0x1d6));}refreshCaptchaButton[_0x309b21(0x19d)](_0x309b21(0x19a),setCaptcha),submitCaptchaButton[_0x309b21(0x19d)](_0x309b21(0x19a),validateCaptcha);function getRandomAvailableSeats(_0x4cab92){const _0x528d3f=_0x309b21,_0x22fb68=[];while(_0x22fb68[_0x528d3f(0x19c)]<_0x4cab92){const _0x4bc56f=Math[_0x528d3f(0x1a4)](Math[_0x528d3f(0x1ca)]()*totalSeats);!_0x22fb68['includes'](_0x4bc56f)&&_0x22fb68[_0x528d3f(0x1d4)](_0x4bc56f);}return _0x22fb68;}function createSeating(){const _0x397779=_0x309b21;let _0x1fe661=Math[_0x397779(0x1a4)](Math['random']()*0x3)+0x1;const _0x1bc840=getRandomAvailableSeats(_0x1fe661);seatingContainer[_0x397779(0x1d7)]='';for(let _0x147aea=0x0;_0x147aea<totalSeats;_0x147aea++){const _0x10bb24=document[_0x397779(0x1a7)]('div');_0x10bb24['className']=_0x397779(0x1b4),_0x10bb24[_0x397779(0x1cf)][_0x397779(0x1d0)]=_0x147aea,_0x1bc840[_0x397779(0x1b9)](_0x147aea)?fakeSeats[_0x397779(0x1aa)](_0x147aea)?(_0x10bb24[_0x397779(0x1d1)][_0x397779(0x1ae)](_0x397779(0x1ac)),_0x10bb24[_0x397779(0x19d)](_0x397779(0x19a),()=>handleFakeSeat(_0x10bb24))):(_0x10bb24[_0x397779(0x1d1)][_0x397779(0x1ae)]('available'),_0x10bb24['addEventListener'](_0x397779(0x19a),()=>toggleSeat(_0x10bb24)),availableSeats[_0x397779(0x1ae)](_0x147aea)):_0x10bb24['classList'][_0x397779(0x1ae)](_0x397779(0x193)),seatingContainer[_0x397779(0x1ba)](_0x10bb24);}}function handleFakeSeat(_0x7fd2b5){const _0x3c76d6=_0x309b21;alert('이미\x20선택된\x20좌석입니다.'),_0x7fd2b5[_0x3c76d6(0x1d1)][_0x3c76d6(0x1ae)](_0x3c76d6(0x193)),_0x7fd2b5[_0x3c76d6(0x1d1)][_0x3c76d6(0x198)](_0x3c76d6(0x1ac)),_0x7fd2b5[_0x3c76d6(0x1bd)](_0x3c76d6(0x19a),()=>handleFakeSeat(_0x7fd2b5));}function toggleSeat(_0x96e75){const _0x40fb72=_0x309b21,_0x412b69=parseInt(_0x96e75[_0x40fb72(0x1cf)][_0x40fb72(0x1d0)]);if(!availableSeats[_0x40fb72(0x1aa)](_0x412b69))return;_0x96e75[_0x40fb72(0x1d1)][_0x40fb72(0x1d2)]('selected'),selectedSeats[_0x40fb72(0x1aa)](_0x412b69)?selectedSeats[_0x40fb72(0x1c0)](_0x412b69):selectedSeats[_0x40fb72(0x1ae)](_0x412b69);}let totalSeatsSelected=0x0;function submitForm(){const _0x44b698=_0x309b21;if(selectedSeats[_0x44b698(0x196)]===0x0){alert(_0x44b698(0x1c6));return;}totalSeatsSelected+=selectedSeats[_0x44b698(0x196)],gameTime>0x0&&(gameTime-=0x1,timerElement[_0x44b698(0x1b0)]=gameTime),resetGame();}function resetGame(){const _0x1c6ecf=_0x309b21;selectedSeats[_0x1c6ecf(0x1b1)](),availableSeats['clear'](),fakeSeats[_0x1c6ecf(0x1b1)](),initialGameTime=Math[_0x1c6ecf(0x1ab)](initialGameTime-timeDecrease,minGameTime),gameTime=initialGameTime,hp=0x64,hpBarFill[_0x1c6ecf(0x1b6)]['width']=hp+'%',timerElement['textContent']=gameTime,seatingContainer[_0x1c6ecf(0x1d7)]='',captchaInput[_0x1c6ecf(0x1b5)]='',captchaMessage['textContent']='',captchaModal[_0x1c6ecf(0x1b6)]['display']=_0x1c6ecf(0x1c4),resultContainer[_0x1c6ecf(0x1b6)][_0x1c6ecf(0x1bc)]=_0x1c6ecf(0x1c4),gameContainer[_0x1c6ecf(0x1b6)][_0x1c6ecf(0x1bc)]='block',startGame();}submitSeatsButton[_0x309b21(0x19d)](_0x309b21(0x19a),()=>{const _0x1df564=_0x309b21;captchaModal[_0x1df564(0x1b6)][_0x1df564(0x1bc)]===_0x1df564(0x1c4)?submitForm():(captchaMessage[_0x1df564(0x1b0)]=_0x1df564(0x19b),captchaMessage[_0x1df564(0x1b6)][_0x1df564(0x1c5)]=_0x1df564(0x1d6));});function retryBooking(){const _0x2f4d0f=_0x309b21;location[_0x2f4d0f(0x19e)]();}updateFakeTime();const timeInterval=setInterval(updateFakeTime,0x3e8);
+const _0x18b94b=_0xf5ef;(function(_0x5ac28b,_0x7a4473){const _0x4f099a=_0xf5ef,_0x3070f5=_0x5ac28b();while(!![]){try{const _0x1d387b=-parseInt(_0x4f099a(0xa7))/0x1*(parseInt(_0x4f099a(0x80))/0x2)+parseInt(_0x4f099a(0xc2))/0x3+-parseInt(_0x4f099a(0x91))/0x4+-parseInt(_0x4f099a(0x94))/0x5*(-parseInt(_0x4f099a(0x9a))/0x6)+parseInt(_0x4f099a(0xd0))/0x7*(parseInt(_0x4f099a(0x93))/0x8)+-parseInt(_0x4f099a(0xbb))/0x9+-parseInt(_0x4f099a(0xb2))/0xa*(-parseInt(_0x4f099a(0xcc))/0xb);if(_0x1d387b===_0x7a4473)break;else _0x3070f5['push'](_0x3070f5['shift']());}catch(_0xda7c2c){_0x3070f5['push'](_0x3070f5['shift']());}}}(_0x5dc6,0x59195));const gameContainer=document[_0x18b94b(0xbc)](_0x18b94b(0xc7)),resultContainer=document[_0x18b94b(0xbc)](_0x18b94b(0x81)),resultMessageElement=document['getElementById'](_0x18b94b(0xc3)),timeTakenElement=document[_0x18b94b(0xbc)]('timeTaken'),captchaTimeTakenElement=document[_0x18b94b(0xbc)](_0x18b94b(0xb4)),seatSelectionTimeTakenElement=document[_0x18b94b(0xbc)](_0x18b94b(0xc4)),retryButton=document[_0x18b94b(0xbc)](_0x18b94b(0x79)),submitSeatsButton=document[_0x18b94b(0xbc)](_0x18b94b(0x8a)),modal=document[_0x18b94b(0xbc)](_0x18b94b(0x84)),queueNumberElement=document[_0x18b94b(0xbc)]('queueNumber'),captchaModal=document[_0x18b94b(0xbc)](_0x18b94b(0x7f)),captchaText=document[_0x18b94b(0xbc)](_0x18b94b(0x86)),captchaInput=document[_0x18b94b(0xbc)]('captcha-input'),captchaMessage=document[_0x18b94b(0xbc)](_0x18b94b(0x8f)),refreshCaptchaButton=document['getElementById'](_0x18b94b(0xbe)),submitCaptchaButton=document['getElementById']('submit-captcha');function _0xf5ef(_0x5030a2,_0x49b06c){const _0x5dc65e=_0x5dc6();return _0xf5ef=function(_0xf5efad,_0x9fcaf8){_0xf5efad=_0xf5efad-0x6c;let _0x3e6a05=_0x5dc65e[_0xf5efad];return _0x3e6a05;},_0xf5ef(_0x5030a2,_0x49b06c);}let seconds=0x38,minutes=0x3b,hours=0xb,queueStartTime,selectionStartTime,selectionEndTime,captchaValue,captchaStartTime,captchaEndTime;const totalSeats=0xc8,seatingContainer=document[_0x18b94b(0xbc)]('seating'),availableSeats=new Set(),selectedSeats=new Set(),fakeSeats=new Set(),hpBarFill=document[_0x18b94b(0xbc)](_0x18b94b(0x8e)),timerElement=document['getElementById'](_0x18b94b(0x96)),bookingButton=document[_0x18b94b(0xbc)](_0x18b94b(0xca));let correctClicks=0x0,totalClicks=0x0,accuracy=0x64;document[_0x18b94b(0x8c)]('click',function(_0x52b6a7){const _0xc4e07a=_0x18b94b;_0x52b6a7[_0xc4e07a(0x73)][_0xc4e07a(0xb5)][_0xc4e07a(0x87)](_0xc4e07a(0xa8))&&(totalClicks++,_0x52b6a7[_0xc4e07a(0x73)][_0xc4e07a(0xb5)][_0xc4e07a(0x87)]('available')&&correctClicks++),updateAccuracy();});function updateAccuracy(){const _0x253e92=_0x18b94b;totalClicks>0x0?accuracy=correctClicks/totalClicks*0x64:accuracy=0x64,document[_0x253e92(0xbc)](_0x253e92(0xb8))[_0x253e92(0x71)]=_0x253e92(0x6c)+accuracy[_0x253e92(0x9b)](0x1)+'%';}let reactionTimes=[],accuracyHistory=[],roundStartTime;function startRound(){const _0x5178d3=_0x18b94b;roundStartTime=new Date(),console[_0x5178d3(0xc8)](_0x5178d3(0xae),roundStartTime);}let timerInterval,gameTime=0xa,hp=0x64,lastTime,initialGameTime=0xa;const timeDecrease=0.5,minGameTime=1.5;let set=0x0;function startGame(){const _0x19711e=_0x18b94b;if(!bookingButton[_0x19711e(0xb5)][_0x19711e(0x87)](_0x19711e(0xc6)))return;set==0x0&&startQueue(),createSeating(),queueStartTime=new Date(),gameTime=Math[_0x19711e(0x8b)](initialGameTime,minGameTime),hp=0x64,startTimer(),!document[_0x19711e(0xbc)](_0x19711e(0x75))['checked']&&setTimeout(()=>{const _0x4f9de9=_0x19711e;captchaModal[_0x4f9de9(0xac)]['display']=_0x4f9de9(0xc9),captchaStartTime=new Date(),setCaptcha();},0x64),startRound();}function startTimer(){const _0xa5787f=_0x18b94b;lastTime=performance[_0xa5787f(0xd1)](),requestAnimationFrame(updateHp);}function updateHp(_0x19bcd9){const _0x265625=_0x18b94b,_0x1b03a0=(_0x19bcd9-lastTime)/0x3e8;lastTime=_0x19bcd9,hp=gameTime/ initialGameTime*0x64,hpBarFill['style']['width']=hp+'%',gameTime-=_0x1b03a0;if(hp<=0x0||gameTime<=0x0){hpBarFill['style']['width']='0%',timerElement[_0x265625(0x71)]='시간\x20초과!',captchaModal['style'][_0x265625(0x9c)]=_0x265625(0x7b),endGame();return;}timerElement[_0x265625(0x71)]=Math['ceil'](gameTime),requestAnimationFrame(updateHp);}function calculateAverageReactionTime(){const _0x2523d2=_0x18b94b;if(reactionTimes[_0x2523d2(0xa5)]===0x0)return 0x0;const _0x1eeed6=reactionTimes[_0x2523d2(0xc0)]((_0x18dbcc,_0x8e03a5)=>_0x18dbcc+_0x8e03a5,0x0);return _0x1eeed6/reactionTimes[_0x2523d2(0xa5)];}function endGame(){const _0x37ebda=_0x18b94b;accuracyHistory['push'](accuracy);if(roundStartTime&&reactionTimes[_0x37ebda(0xa5)]<accuracyHistory[_0x37ebda(0xa5)]){const _0x27572b=new Date(),_0x17be5a=(_0x27572b-roundStartTime)/0x3e8;reactionTimes[_0x37ebda(0xaf)](_0x17be5a);}gameContainer[_0x37ebda(0xac)][_0x37ebda(0x9c)]=_0x37ebda(0x7b),resultContainer[_0x37ebda(0xac)][_0x37ebda(0x9c)]='block';const _0x532cb8=calculateAverageReactionTime(),_0x448607=document[_0x37ebda(0xbc)](_0x37ebda(0xd8));_0x448607[_0x37ebda(0xcd)]=_0x37ebda(0x70)+totalScore+'점';const _0x139947=updateBestScore(totalScore),_0x45b208=document[_0x37ebda(0xbc)](_0x37ebda(0xa1));_0x45b208[_0x37ebda(0xcd)]=_0x37ebda(0xd5)+_0x139947+'점',document[_0x37ebda(0xbc)]('averageReactionTime')[_0x37ebda(0x71)]=_0x532cb8[_0x37ebda(0x9b)](0x2)+'초',document[_0x37ebda(0xbc)]('finalAccuracy')['textContent']=accuracy[_0x37ebda(0x9b)](0x2)+'%',displayChart();}function updateFakeTime(){const _0x3fd6bc=_0x18b94b;seconds++;seconds===0x3c&&(seconds=0x0,minutes++);minutes===0x3c&&(minutes=0x0,hours++);hours===0xd&&(hours=0x1);const _0x41d514=String(hours)[_0x3fd6bc(0x76)](0x2,'0'),_0x190ecd=String(minutes)[_0x3fd6bc(0x76)](0x2,'0'),_0x557963=String(seconds)[_0x3fd6bc(0x76)](0x2,'0');timeDisplay[_0x3fd6bc(0x71)]=_0x41d514+':'+_0x190ecd+':'+_0x557963,hours===0xc&&minutes===0x0&&seconds===0x0&&activateButton();}function activateButton(){const _0x11ad73=_0x18b94b;bookingButton['classList']['add'](_0x11ad73(0xc6)),bookingButton['disabled']=![],bookingButton[_0x11ad73(0x83)](_0x11ad73(0x7e),showAlert);}function showAlert(){const _0xe8b549=_0x18b94b;alert(_0xe8b549(0x88));}bookingButton['addEventListener']('click',showAlert);function startQueue(){const _0x30d381=_0x18b94b;if(!bookingButton[_0x30d381(0xb5)]['contains']('active'))return;set=0x1;const _0xc94b68=Math['floor'](Math[_0x30d381(0x82)]()*(0x159-0x40+0x1))+0x40;queueNumberElement&&(queueNumberElement['textContent']=_0x30d381(0xc1)+_0xc94b68+'번'),modal['style'][_0x30d381(0x9c)]=_0x30d381(0xc9),setTimeout(()=>{const _0x4b96af=_0x30d381;modal[_0x4b96af(0xac)][_0x4b96af(0x9c)]='none',initialContainer[_0x4b96af(0xac)][_0x4b96af(0x9c)]=_0x4b96af(0x7b),gameContainer[_0x4b96af(0xac)]['display']=_0x4b96af(0xbf);},0x3e8);}function generateCaptcha(_0x5421e=0x6){const _0x58bbde=_0x18b94b,_0x2df48b=_0x58bbde(0xb1);let _0x1fa415='';for(let _0x5c90da=0x0;_0x5c90da<_0x5421e;_0x5c90da++){const _0xa3d1c0=Math[_0x58bbde(0xb6)](Math[_0x58bbde(0x82)]()*_0x2df48b[_0x58bbde(0xa5)]);_0x1fa415+=_0x2df48b[_0xa3d1c0];}return _0x1fa415;}function setCaptcha(){captchaInput['value']='',captchaValue=generateCaptcha(),captchaText['textContent']=captchaValue;}function validateCaptcha(){const _0x309bfd=_0x18b94b,_0x3bce4e=captchaInput[_0x309bfd(0xd4)][_0x309bfd(0xb9)]();_0x3bce4e===captchaValue?(captchaModal[_0x309bfd(0xac)][_0x309bfd(0x9c)]=_0x309bfd(0x7b),selectionStartTime=new Date()):(captchaMessage[_0x309bfd(0x71)]=_0x309bfd(0x6f),captchaMessage[_0x309bfd(0xac)][_0x309bfd(0x78)]=_0x309bfd(0x72));}refreshCaptchaButton[_0x18b94b(0x8c)](_0x18b94b(0x7e),setCaptcha),submitCaptchaButton[_0x18b94b(0x8c)]('click',validateCaptcha);function getRandomAvailableSeats(_0x33c41e){const _0x4ae0f4=_0x18b94b,_0x2c949e=[];while(_0x2c949e[_0x4ae0f4(0xa5)]<_0x33c41e){const _0x5432a6=Math[_0x4ae0f4(0xb6)](Math[_0x4ae0f4(0x82)]()*totalSeats);!_0x2c949e['includes'](_0x5432a6)&&_0x2c949e[_0x4ae0f4(0xaf)](_0x5432a6);}return _0x2c949e;}function createSeating(){const _0x2a81a3=_0x18b94b;let _0x5e73f2=Math[_0x2a81a3(0xb6)](Math[_0x2a81a3(0x82)]()*0x3)+0x1;const _0x2be7c0=getRandomAvailableSeats(_0x5e73f2);seatingContainer[_0x2a81a3(0xcd)]='';for(let _0x47db16=0x0;_0x47db16<totalSeats;_0x47db16++){const _0x32e4de=document[_0x2a81a3(0x6d)](_0x2a81a3(0xa9));_0x32e4de[_0x2a81a3(0xba)]=_0x2a81a3(0xa8),_0x32e4de[_0x2a81a3(0xaa)]['index']=_0x47db16,_0x2be7c0['includes'](_0x47db16)?fakeSeats[_0x2a81a3(0xc5)](_0x47db16)?(_0x32e4de[_0x2a81a3(0xb5)][_0x2a81a3(0x74)](_0x2a81a3(0x7c)),_0x32e4de[_0x2a81a3(0x8c)]('click',()=>handleFakeSeat(_0x32e4de))):(_0x32e4de[_0x2a81a3(0xb5)][_0x2a81a3(0x74)](_0x2a81a3(0x85)),_0x32e4de['addEventListener']('click',()=>toggleSeat(_0x32e4de)),availableSeats['add'](_0x47db16)):_0x32e4de[_0x2a81a3(0xb5)]['add'](_0x2a81a3(0x6e)),seatingContainer['appendChild'](_0x32e4de);}}function handleFakeSeat(_0x281b92){const _0x52b70e=_0x18b94b;alert('이미\x20선택된\x20좌석입니다.'),_0x281b92['classList'][_0x52b70e(0x74)](_0x52b70e(0x6e)),_0x281b92[_0x52b70e(0xb5)][_0x52b70e(0x92)](_0x52b70e(0x7c)),_0x281b92['removeEventListener'](_0x52b70e(0x7e),()=>handleFakeSeat(_0x281b92));}let totalScore=0x0;function updateScore(){const _0x24d039=_0x18b94b,_0x2b0c7c=gameTime/ initialGameTime,_0x4c7911=Math['floor'](0xa+0x5a*_0x2b0c7c);totalScore+=selectedSeats[_0x24d039(0xcb)]*_0x4c7911;const _0x3480d5=document[_0x24d039(0xbc)](_0x24d039(0x89));_0x3480d5[_0x24d039(0x71)]=totalScore,_0x3480d5[_0x24d039(0xac)][_0x24d039(0xb7)]=_0x24d039(0xb3),setTimeout(()=>{const _0x14553f=_0x24d039;_0x3480d5[_0x14553f(0xac)][_0x14553f(0xb7)]='scale(1)';},0x1f4);}function toggleSeat(_0xdb1f72){const _0x4adf00=_0x18b94b,_0x34b646=parseInt(_0xdb1f72['dataset'][_0x4adf00(0xa2)]);_0xdb1f72[_0x4adf00(0xb5)]['contains']('available')&&(_0xdb1f72['classList'][_0x4adf00(0x7d)](_0x4adf00(0x9d)),selectedSeats[_0x4adf00(0xc5)](_0x34b646)?selectedSeats['delete'](_0x34b646):selectedSeats['add'](_0x34b646)),updateAccuracy();}let totalSeatsSelected=0x0;function submitForm(){const _0xe4fcfb=_0x18b94b;if(selectedSeats[_0xe4fcfb(0xcb)]===0x0){alert(_0xe4fcfb(0xd7));return;}const _0x58537f=new Date();if(roundStartTime){const _0x5caf75=(_0x58537f-roundStartTime)/0x3e8;reactionTimes[_0xe4fcfb(0xaf)](_0x5caf75),console['log'](_0xe4fcfb(0x9f),_0x5caf75,_0xe4fcfb(0x99));}else console[_0xe4fcfb(0xc8)](_0xe4fcfb(0xbd));updateScore(),selectedSeats[_0xe4fcfb(0xab)](),seatingContainer[_0xe4fcfb(0x95)](_0xe4fcfb(0x77))['forEach'](_0x213326=>_0x213326['classList'][_0xe4fcfb(0x92)](_0xe4fcfb(0x9d))),totalSeatsSelected+=selectedSeats['size'],gameTime>0x0&&(gameTime-=0x1,timerElement[_0xe4fcfb(0x71)]=gameTime),accuracyHistory['push'](accuracy),updateScore(),resetGame();}function resetGame(){const _0x37329d=_0x18b94b;selectedSeats[_0x37329d(0xab)](),availableSeats[_0x37329d(0xab)](),fakeSeats[_0x37329d(0xab)](),initialGameTime=Math[_0x37329d(0x8b)](initialGameTime-timeDecrease,minGameTime),gameTime=initialGameTime,hp=0x64,hpBarFill[_0x37329d(0xac)][_0x37329d(0x90)]=hp+'%',timerElement[_0x37329d(0x71)]=gameTime,seatingContainer[_0x37329d(0xcd)]='',captchaInput[_0x37329d(0xd4)]='',captchaMessage[_0x37329d(0x71)]='',captchaModal['style'][_0x37329d(0x9c)]=_0x37329d(0x7b),resultContainer[_0x37329d(0xac)][_0x37329d(0x9c)]=_0x37329d(0x7b),gameContainer[_0x37329d(0xac)][_0x37329d(0x9c)]=_0x37329d(0xbf),startGame();}submitSeatsButton[_0x18b94b(0x8c)]('click',()=>{const _0x3fbda7=_0x18b94b;captchaModal[_0x3fbda7(0xac)][_0x3fbda7(0x9c)]===_0x3fbda7(0x7b)?submitForm():(captchaMessage[_0x3fbda7(0x71)]=_0x3fbda7(0xa3),captchaMessage['style'][_0x3fbda7(0x78)]='red');});let chartInitialized=![];function displayChart(){const _0xa1396=_0x18b94b;if(!chartInitialized){const _0x186f9e=document[_0xa1396(0xbc)](_0xa1396(0x98))[_0xa1396(0xd6)]('2d');reactionChart=new Chart(_0x186f9e,{'type':_0xa1396(0x9e),'data':{'labels':reactionTimes[_0xa1396(0xd2)]((_0x4b4c2e,_0xfd6887)=>'라운드\x20'+(_0xfd6887+0x1)),'datasets':[{'label':_0xa1396(0x7a),'data':reactionTimes,'borderColor':'rgba(75,\x20192,\x20192,\x201)','backgroundColor':_0xa1396(0xa0),'fill':!![]}]},'options':{'responsive':!![],'scales':{'y':{'title':{'display':!![],'text':_0xa1396(0x7a)}}},'plugins':{'legend':{'display':![]}}}});const _0x209679=document['getElementById'](_0xa1396(0xa4))['getContext']('2d');accuracyChart=new Chart(_0x209679,{'type':_0xa1396(0x9e),'data':{'labels':accuracyHistory[_0xa1396(0xd2)]((_0x3d5275,_0x8b2b27)=>_0xa1396(0xa6)+(_0x8b2b27+0x1)),'datasets':[{'label':_0xa1396(0xce),'data':accuracyHistory,'borderColor':_0xa1396(0xad),'backgroundColor':_0xa1396(0xcf),'fill':!![]}]},'options':{'responsive':!![],'scales':{'y':{'title':{'display':!![],'text':'정확도\x20(%)'}}},'plugins':{'legend':{'display':![]}}}}),chartInitialized=!![];}else reactionChart[_0xa1396(0xd3)](),accuracyChart[_0xa1396(0xd3)]();}function updateBestScore(_0xa805e1){const _0x3ecd06=_0x18b94b,_0x1d9c24=localStorage[_0x3ecd06(0x97)]('bestScore')||0x0;if(_0xa805e1>_0x1d9c24)return localStorage[_0x3ecd06(0xb0)](_0x3ecd06(0xa1),_0xa805e1),_0xa805e1;return _0x1d9c24;}function retryBooking(){const _0x5ab673=_0x18b94b;location[_0x5ab673(0x8d)]();}updateFakeTime();function _0x5dc6(){const _0x42f86e=['clear','style','rgba(255,\x2099,\x20132,\x201)','Round\x20started\x20at:','push','setItem','ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789','490010lVbVOF','scale(1.5)','captchaTimeTaken','classList','floor','transform','accuracyDisplay','trim','className','1991484LEvjuq','getElementById','Round\x20start\x20time\x20is\x20not\x20set\x20properly.','refresh-captcha','block','reduce','대기순번\x20','1083411WHzojp','resultMessage','seatSelectionTimeTaken','has','active','gameContainer','log','flex','bookingButton','size','11TjaokD','innerHTML','정확도\x20(%)','rgba(255,\x2099,\x20132,\x200.2)','14GBaKhu','now','map','update','value','최고\x20점수:\x20','getContext','좌석을\x20선택해주세요.','finalScore','정확도\x20','createElement','unavailable','보안문자가\x20틀렸습니다.','최종\x20점수\x20','textContent','red','target','add','skipCaptcha','padStart','.seat.selected','color','retryButton','반응\x20속도\x20(초)','none','fake','toggle','click','captchaModal','4KzrguL','resultContainer','random','removeEventListener','modal','available','captcha','contains','예매는\x2012:00에\x20시작됩니다.','scoreNumber','submitSeatsButton','max','addEventListener','reload','hpBarFill','captcha-message','width','2785820NRhoBV','remove','2650496UIeScR','60HOeqPf','querySelectorAll','timer','getItem','reactionTimeChart','seconds','206898ZiAukU','toFixed','display','selected','line','Reaction\x20time\x20for\x20this\x20round:','rgba(75,\x20192,\x20192,\x200.2)','bestScore','index','CAPTCHA를\x20먼저\x20완료해주세요.','accuracyChart','length','라운드\x20','101939UbXTDM','seat','div','dataset'];_0x5dc6=function(){return _0x42f86e;};return _0x5dc6();}const timeInterval=setInterval(updateFakeTime,0x3e8);
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
     
 </body>
 </html>
